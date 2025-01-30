@@ -105,11 +105,6 @@ class LX16A:
         return LX16A._controller.timeout
 
     def __init__(self, id_: int, disable_torque: bool = False) -> None:
-        if id_ < 0 or id_ > 253:
-            raise ServoArgumentError(
-                "Servo ID must be between 0 and 253 inclusive", id_
-            )
-
         self._id = id_
         self._commanded_angle = LX16A._to_servo_range(self.get_physical_angle())
         self._waiting_angle = self._commanded_angle
@@ -373,12 +368,22 @@ class LX16A:
         self._motor_mode = False
 
     def enable_torque(self) -> None:
-        packet = [self._id, 4, 31, 0]
+        packet = [self._id, 4, 31, 1]
+        LX16A._send_packet(packet)
+        self._torque_enabled = True
+
+    def enable_torque_all(self) -> None:
+        packet = [254, 4, 31, 1]
         LX16A._send_packet(packet)
         self._torque_enabled = True
 
     def disable_torque(self) -> None:
-        packet = [self._id, 4, 31, 1]
+        packet = [self._id, 4, 31, 0]
+        LX16A._send_packet(packet)
+        self._torque_enabled = False
+
+    def disable_torque_all(self) -> None:
+        packet = [254, 4, 31, 0]
         LX16A._send_packet(packet)
         self._torque_enabled = False
 
